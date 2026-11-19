@@ -246,9 +246,9 @@ class MainActivity : Activity() {
         if (days == 1) {
             card.addView(label("Wystaw pojemniki dziś wieczorem", 18f, ACCENT).apply { setPadding(0, dp(6), 0, 0) })
         }
-        p.types.forEach {
-            card.addView(chip(it, 30f, dp(18)), LinearLayout.LayoutParams(MATCH, WRAP).apply { topMargin = dp(14) })
-        }
+        val chips = FlowLayout(this, dp(12))
+        p.types.forEach { chips.addView(chip(it, 26f, dp(14))) }
+        card.addView(chips, LinearLayout.LayoutParams(MATCH, WRAP).apply { topMargin = dp(18) })
         return card
     }
 

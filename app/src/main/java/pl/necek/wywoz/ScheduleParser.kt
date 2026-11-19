@@ -39,7 +39,7 @@ object ScheduleParser {
     private class Entry(val day: Int, val month: Int, val year: Int?, val weekday: Int?, val types: List<String>)
 
     fun parse(text: String, today: LocalDate = LocalDate.now()): List<Pickup> {
-        val clean = text.replace(Char(0xA0), ' ').replace("\r", "").lowercase()
+        val clean = cutFooter(text.replace(Char(0xA0), ' ').replace("\r", "")).lowercase()
         val reference = generatedRegex.find(clean)?.let {
             runCatching {
                 LocalDate.of(it.groupValues[1].toInt(), it.groupValues[2].toInt(), it.groupValues[3].toInt())
@@ -73,6 +73,22 @@ object ScheduleParser {
             if (e.types.isNotEmpty()) result.getOrPut(date) { LinkedHashSet() }.addAll(e.types)
         }
         return result.map { Pickup(it.key, it.value.toList()) }
+    }
+
+    private fun cutFooter(text: String): String {
+        val lines = text.lines()
+        val firstDate = lines.indexOfFirst { dateRegex.containsMatchIn(it.lowercase()) }
+        if (firstDate < 0) return text
+        for (i in firstDate + 1 until lines.size) {
+            val line = lines[i].trim()
+            val letters = line.filter { it.isLetter() }
+            if (letters.length < 4 || !letters.all { it.isUpperCase() }) continue
+            val next = lines.drop(i + 1).map { it.trim() }.firstOrNull { it.isNotEmpty() }.orEmpty()
+            if (line.endsWith(":") || next.startsWith("-") || next.startsWith("–") || next.length > 80) {
+                return lines.take(i).joinToString("\n")
+            }
+        }
+        return text
     }
 
     private fun datesFor(entries: List<Entry>, startYear: Int): List<LocalDate?> {
