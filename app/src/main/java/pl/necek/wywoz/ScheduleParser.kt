@@ -39,7 +39,7 @@ object ScheduleParser {
     private class Entry(val day: Int, val month: Int, val year: Int?, val weekday: Int?, val types: List<String>)
 
     fun parse(text: String, today: LocalDate = LocalDate.now()): List<Pickup> {
-        val clean = text.replace(' ', ' ').replace("\r", "").lowercase()
+        val clean = text.replace(Char(0xA0), ' ').replace("\r", "").lowercase()
         val reference = generatedRegex.find(clean)?.let {
             runCatching {
                 LocalDate.of(it.groupValues[1].toInt(), it.groupValues[2].toInt(), it.groupValues[3].toInt())

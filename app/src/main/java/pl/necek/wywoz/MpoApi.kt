@@ -46,7 +46,7 @@ object MpoApi {
     }
 
     private fun items(json: String): List<ApiItem> {
-        val trimmed = json.trim { it.isWhitespace() || it == '﻿' }
+        val trimmed = json.trim { it.isWhitespace() || it == Char(0xFEFF) }
         if (!trimmed.startsWith("[")) throw IOException("Nieoczekiwana odpowiedź serwera: ${trimmed.take(100)}")
         val array = JSONArray(trimmed)
         return (0 until array.length()).mapNotNull { i ->
